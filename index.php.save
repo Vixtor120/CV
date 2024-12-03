@@ -1,0 +1,52 @@
+
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mini CV del Autor</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.1/dist/css/bootstrap.min.css">
+</head>
+<body class="bg-light">
+    <div class="container py-5">
+        <h1 class="text-center mb-4">Mini CV del Autor</h1>
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <?php
+                // Función para conectar a PostgreSQL
+                function connectPostgreSQL() {
+                    $host = 'localhost';
+                    $port = '5432';
+                    $dbname = 'cv_pg_db';
+                    $user = 'cv_pg_user';
+                    $password = 'password';
+
+                    $conn = pg_connect("host=$host port=$port dbname=$dbname user=$user password=$password");
+
+                    // Comprobar conexión
+                    if (!$conn) {
+                        die("<p class='text-danger'>Conexión fallida: " . pg_last_error() . "</p>");
+                    }
+                    return $conn;
+                }
+
+                // Función para obtener información del CV
+                function getCVInfoPostgreSQL($conn) {
+                    $query = "SELECT * FROM cv_info LIMIT 1";
+                    $result = pg_query($conn, $query);
+
+                    if ($result && pg_num_rows($result) > 0) {
+                        return pg_fetch_assoc($result);
+                    } else {
+                        return null;
+                    }
+                }
+
+                // Conectar a PostgreSQL y obtener información del CV
+                $conn = connectPostgreSQL();
+                $cv = getCVInfoPostgreSQL($conn);
+
+                if ($cv) {
+                    echo "<h2 class='card-title text-primary'>" . htmlspecialchars($cv['name']) . "</h2>";
+                    echo "<h5 class='text-secondary'>" . htmlspecialchars($cv['profession']) . "</h5>";
+                    echo "<p><strong>Experiencia:</strong> " . nl2br(htmlspecialchars($cv['experience'])) . "</p>";
+                    echo "<p><strong>Email:</strong> <a href='mailto:" . htmlspecialchars($cv['email']) . "'>" . htmlspe
